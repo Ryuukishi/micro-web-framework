@@ -17,14 +17,18 @@ function App() {
       const imageList = [];
       res.data.map((data) => imageList.push(data.image));
       setImages(imageList);
-      console.log("imagelist", imageList);
-      console.log("res.data", res.data);
+      // console.log("imagelist", imageList);
+      // console.log("res.data", res.data);
     } catch (err) {
       console.error(err);
     }
   };
 
   const handleFile = (e) => {
+    console.log(e.target.files);
+
+    // single file upload
+    // therefore file will always be at index 0
     setFile(e.target.files[0]);
   };
 
@@ -47,6 +51,22 @@ function App() {
     }
   };
 
+  const handleDelete = async (e) => {
+    e.preventDefault();
+    const file = e.target.value;
+    console.log(file);
+    try {
+      const { status, data } = await axios.delete(`/api/image/${file}`);
+      if (status === 200) {
+        setImages(images.filter((image) => image !== file));
+      } else {
+        console.log(status, data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div>
       <h1>Image Upload</h1>
@@ -64,9 +84,14 @@ function App() {
         </button>
       </form>
       {images.map((image) => (
-        <Link to={{ pathname: `/image/${image}` }} key={image}>
-          <img src={`/api/image/${image}`} loading='lazy' />
-        </Link>
+        <span key={image}>
+          <Link to={{ pathname: `/image/${image}` }}>
+            <img src={`/api/image/${image}`} loading='lazy' />
+          </Link>
+          <button value={image} onClick={handleDelete}>
+            Delete
+          </button>
+        </span>
       ))}
     </div>
   );
